@@ -221,13 +221,13 @@ async def update_db(message):
                 # Для шаблона (уйти от данного распаралеливания путём удаления ненужных столбцов из базы!!!)
                 df_shablon = df.copy()
                 df_shablon = drop_extra_cols(df_shablon, table)
-                df_shablon.to_excel('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Шаблон из кода.xlsx', index=False)
+                save_excel(df_shablon, '/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Шаблон из кода.xlsx')
 
                 # Обновляем шаблон для облака
-                name_sheet = sheet_names[table]
-                await bot.send_message(message.chat.id, f'Началась загрузка шаблона - {name_sheet}')
-                update_shablon_sheet(new_target_name, name_sheet, df_shablon)
-                await bot.send_message(message.chat.id, f'Завершилась загрузка шаблона - {name_sheet}')
+                # name_sheet = sheet_names[table]
+                # await bot.send_message(message.chat.id, f'Началась загрузка шаблона - {name_sheet}')
+                # update_shablon_sheet(new_target_name, name_sheet, df_shablon)
+                # await bot.send_message(message.chat.id, f'Завершилась загрузка шаблона - {name_sheet}')
 
                 # Для базы исправляем типы и заполняем пропуски, чтобы всё безошибочно легло
                 df = change_type(df)
@@ -425,10 +425,10 @@ async def target_telegram(message):
             df = get_telegram_table(df, kpi, user, password, host, port)
 
             # Обновляем лист "Статистика ТГ" в шаблоне по таргету
-            name_sheet = 'Статистика ТГ'
-            await bot.send_message(message.chat.id, f'Началась загрузка шаблона - {name_sheet}')
-            update_stat_in_shablon(df, name_sheet)
-            await bot.send_message(message.chat.id, f'Завершилась загрузка шаблона - {name_sheet}')
+            # name_sheet = 'Статистика ТГ'
+            # await bot.send_message(message.chat.id, f'Началась загрузка шаблона - {name_sheet}')
+            # update_stat_in_shablon(df, name_sheet)
+            # await bot.send_message(message.chat.id, f'Завершилась загрузка шаблона - {name_sheet}')
 
             # Обновление таблицы "telegram" в базе
             await bot.send_message(message.chat.id, f'Таблица загружается в БД')

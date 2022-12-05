@@ -482,7 +482,7 @@ def clean_str(s, condition):
     return s
 
 
-def save_excel(data, path, header=False):
+def save_excel(data, path, header=True):
 
     data = data.copy()
 
@@ -621,12 +621,6 @@ def get_ID_columns(df, url_col):
             vkpoid.append('не определён')
     df_k_VK['group_id'] = vkgid
     df_k_VK['post_id'] = vkpoid
-    # proba_vk = to_excel(df_k_VK)
-    # st.download_button(label='📥 Скачать промежуточный результат', data=proba_vk, file_name= 'топ 20.xlsx')
-
-    # удаляем дубликаты
-    # df_k_VK_pars = df_k_VK_pars.drop_duplicates(['post_id', 'group_id'], keep='last')
-    # df_k_VK_pars
 
     # достаем айдишки групп и постов по ОК
     df_k_OK = df[(df['Соцсеть'] == 'OK')]
@@ -1287,7 +1281,7 @@ def get_regions_score(data_all, baza, user, password, host, port):
 
 # Функция обновления листа в шаблоне
 def update_shablon_sheet(path_table, name_sheet, table):
-    with pd.ExcelWriter(path_table, engine="openpyxl", mode="a", if_sheet_exists='replace') as sheet_writer:
+    with pd.ExcelWriter(path_table, engine="openpyxl", mode="a", if_sheet_exists='replace') as sheet_writer: # нет options={'strings_to_urls': False} сука
         table.to_excel(sheet_writer, sheet_name=name_sheet, index=False)
 
 
@@ -1331,7 +1325,7 @@ async def predobr_otchet(chat_id, tg_bot, df):
         nan_flag_series = df.isna().sum(axis=1)
         empty_row_indexes = nan_flag_series[nan_flag_series != 0].index
         df_empty = df.iloc[empty_row_indexes]
-        save_excel(df_empty, f'/media/sidorov/dev/NoteProjects/Bots/target_dash/rows_with_nan.xlsx', header=True)
+        save_excel(df_empty, f'/media/sidorov/dev/NoteProjects/Bots/target_dash/rows_with_nan.xlsx')
         await tg_bot.send_document(chat_id=chat_id, document=open(
             f'/media/sidorov/dev/NoteProjects/Bots/target_dash/rows_with_nan.xlsx', 'rb'))
 
@@ -1427,8 +1421,6 @@ def get_google_table(df, kpi):
                            'CTR', 'Дата_начала', 'Дата_динамика', 'Показы_динамика_сутки',
                            'Подписчики_динамика_сутки', 'CTR_сутки']]
 
-    # df_google.to_excel('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/test_table.xlsx')
-
     # берём тоблицу для отправки в гугл Пашке
     df_google = df_google.reset_index().T.reset_index().T
     df_google = df_google.drop([0], axis=1)
@@ -1450,8 +1442,8 @@ def get_telegram_table(df, kpi, user, password, host, port):
                        'ID',
                        'Прогнозируемое кол-во подписчиков',
                        'Необходимое кол-во показов']], on=['ID'], how='left')
-    
-    df_telegram.to_excel('/media/sidorov/dev/NoteProjects/Zalivka_BD/after_ID_merge.xlsx')
+
+    save_excel(df_telegram, '/media/sidorov/dev/NoteProjects/Zalivka_BD/after_ID_merge.xlsx')
     
     # Присоединяем координаты региона (для карты, из нашей базы)
     coords = get_table('vlad', 'regions_coords', user, password, host, port)
@@ -1477,8 +1469,8 @@ def update_stat_in_shablon(df, name_sheet):
         os.remove('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Shablon_lists/Статистика_ТГ.xlsx')
     except:
         pass
-    df_shablon.to_excel('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Shablon_lists/Статистика_ТГ.xlsx',
-                        index=False)
+
+    save_excel(df_shablon, '/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Shablon_lists/Статистика_ТГ.xlsx')
 
     update_shablon_sheet('Шаблон для таргета.xlsx', name_sheet, df_shablon)
 
@@ -1542,7 +1534,7 @@ async def get_telegram_little(chat_id, tg_bot, df, kpi, def_sum_show, def_sum_de
     little = little.merge(df_buf, on='Регион', how='inner')
 
     # Отладочное сохранение
-    little.to_excel('/media/sidorov/dev/NoteProjects/Zalivka_BD/test_little.xlsx')
+    save_excel(little, '/media/sidorov/dev/NoteProjects/Zalivka_BD/test_little.xlsx')
 
     # Оставляем только нужные столбцы, переименовываем их названия и заполняем пропуски
     little = little[['Регион',
@@ -1850,6 +1842,12 @@ def get_budget_table():
     return budg_start
 
 
+# http://
+# https://
+# http://@
+# https://@
+
+
 # Функция выделения ID телеграмм канала
 def get_TG_id(s1):
     # Выделяем часть после "t.me/"
@@ -1859,7 +1857,10 @@ def get_TG_id(s1):
         logging.exception(f'{e}, - {s1}')
         print(e)
         print(s1)
-        s1 = s1.split('/@')[1]
+        s1 = re.sub(r'https', '', s1)
+        s1 = re.sub(r'http', '', s1)
+        s1 = re.sub(r'//@', '', s1)
+        s1 = re.sub(r'/@', '', s1)
 
     # Выделенной части находим первый не буквенный и числовой элемент (и "_")
     simbols = re.findall(r'\W', s1)
@@ -1879,7 +1880,7 @@ def add_chat_id(username, chat_id):
     UsChatId = pd.read_excel('UsChatId.xlsx')
     if username not in UsChatId['user_name'].values:
         UsChatId = UsChatId.append({'user_name': username, 'chat_id': chat_id}, ignore_index=True)
-        UsChatId.to_excel('UsChatId.xlsx', index=False)
+        save_excel(UsChatId, 'UsChatId.xlsx')
 
 
 # Тест fun
