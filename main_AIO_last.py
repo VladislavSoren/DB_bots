@@ -85,9 +85,9 @@ async def delete_ex_tables(message):
     access = username in users['User_name'].values
     if access:
         try:
-            dirs = ['/media/sidorov/dev/NoteProjects/Bots/target_dash/inf/',
-                    '/media/sidorov/dev/NoteProjects/Bots/target_dash/pod/',
-                    '/media/sidorov/dev/NoteProjects/Bots/target_dash/soc/'
+            dirs = ['/target_dash/inf/',
+                    '/target_dash/pod/',
+                    '/target_dash/soc/'
                     ]
 
             await bot.send_message(message.chat.id, 'Удаляем старые')
@@ -114,9 +114,9 @@ async def delete_ex_tables(message):
             try:
                 file_info = await bot.get_file(message.document.file_id)
                 df = pd.read_excel(file_info.file_path)
-                path = '/media/sidorov/dev/NoteProjects/Bots/target_dash/inf/' + file_info.file_path.split('documents/')[1]
+                path = '/target_dash/inf/' + file_info.file_path.split('documents/')[1]
                 save_excel(df, path)
-                dir_names = os.listdir('/media/sidorov/dev/NoteProjects/Bots/target_dash/inf')
+                dir_names = os.listdir('/target_dash/inf')
                 await bot.send_message(message.chat.id, f'''Загружено файлов по информированию - {len(dir_names)}''')
             except Exception as e:
                 await bot.send_message(message.chat.id, e)
@@ -134,9 +134,9 @@ async def delete_ex_tables(message):
             try:
                 file_info = await bot.get_file(message.document.file_id)
                 df = pd.read_excel(file_info.file_path)
-                path = '/media/sidorov/dev/NoteProjects/Bots/target_dash/pod/' + file_info.file_path.split('documents/')[1]
+                path = '/target_dash/pod/' + file_info.file_path.split('documents/')[1]
                 save_excel(df, path)
-                dir_names = os.listdir('/media/sidorov/dev/NoteProjects/Bots/target_dash/pod')
+                dir_names = os.listdir('/target_dash/pod')
                 await bot.send_message(message.chat.id, f'''Загружено файлов по подпискам - {len(dir_names)}''')
             except Exception as e:
                 await bot.send_message(message.chat.id, e)
@@ -155,9 +155,9 @@ async def delete_ex_tables(message):
                 file_info = await bot.get_file(message.document.file_id)
                 # await bot.send_message(message.chat.id, file_info.file_path)
                 df = pd.read_excel(file_info.file_path)
-                path = '/media/sidorov/dev/NoteProjects/Bots/target_dash/soc/' + file_info.file_path.split('documents/')[1]
+                path = '/target_dash/soc/' + file_info.file_path.split('documents/')[1]
                 save_excel(df, path)
-                dir_names = os.listdir('/media/sidorov/dev/NoteProjects/Bots/target_dash/soc')
+                dir_names = os.listdir('/target_dash/soc')
                 await bot.send_message(message.chat.id, f'''Загружено файлов по социологии - {len(dir_names)}''')
             except Exception as e:
                 await bot.send_message(message.chat.id, e)
@@ -175,9 +175,9 @@ async def update_db(message):
     if access:
         try:
             dirs = [
-                '/media/sidorov/dev/NoteProjects/Bots/target_dash/inf/',
-                '/media/sidorov/dev/NoteProjects/Bots/target_dash/pod/',
-                '/media/sidorov/dev/NoteProjects/Bots/target_dash/soc/',
+                '/target_dash/inf/',
+                '/target_dash/pod/',
+                '/target_dash/soc/',
             ]
 
             tables = [
@@ -193,7 +193,7 @@ async def update_db(message):
             }
 
             # Задаём путь к шаблону по таргету
-            path_shablon = '/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Шаблон для таргета.xlsx'
+            path_shablon = '/Шаблон для таргета.xlsx'
 
             # Создаём копию шаблона по таргету с текущей датой (изменения будем производить в ней)
             current_date = datetime.now()
@@ -221,7 +221,7 @@ async def update_db(message):
                 # Для шаблона (уйти от данного распаралеливания путём удаления ненужных столбцов из базы!!!)
                 df_shablon = df.copy()
                 df_shablon = drop_extra_cols(df_shablon, table)
-                save_excel(df_shablon, '/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Шаблон из кода.xlsx')
+                save_excel(df_shablon, 'Шаблон из кода.xlsx')
 
                 # Обновляем шаблон для облака
                 # name_sheet = sheet_names[table]
@@ -306,7 +306,7 @@ async def update_big_table(message):
             await bot.send_message(message.chat.id, 'Обновляем regions_scor для Superset!')
 
             # Берём файл с самой актуальной датой
-            name_files = os.listdir('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots')
+            name_files = os.listdir(path=".") # из текущей дирректории
             target_files = [name for name in name_files if 'Таргет' in name]
             target_files.sort()
             new_target_name = target_files[-1]

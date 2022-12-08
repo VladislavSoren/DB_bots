@@ -1325,9 +1325,9 @@ async def predobr_otchet(chat_id, tg_bot, df):
         nan_flag_series = df.isna().sum(axis=1)
         empty_row_indexes = nan_flag_series[nan_flag_series != 0].index
         df_empty = df.iloc[empty_row_indexes]
-        save_excel(df_empty, f'/media/sidorov/dev/NoteProjects/Bots/target_dash/rows_with_nan.xlsx')
+        save_excel(df_empty, f'rows_with_nan.xlsx')
         await tg_bot.send_document(chat_id=chat_id, document=open(
-            f'/media/sidorov/dev/NoteProjects/Bots/target_dash/rows_with_nan.xlsx', 'rb'))
+            f'rows_with_nan.xlsx', 'rb'))
 
     # Убираем грязь из числовых столбцов
     df['Показы'] = df['Показы'].apply(lambda x: int(clean_str(str(x), '[^0-9.]')))
@@ -1442,8 +1442,6 @@ def get_telegram_table(df, kpi, user, password, host, port):
                        'ID',
                        'Прогнозируемое кол-во подписчиков',
                        'Необходимое кол-во показов']], on=['ID'], how='left')
-
-    save_excel(df_telegram, '/media/sidorov/dev/NoteProjects/Zalivka_BD/after_ID_merge.xlsx')
     
     # Присоединяем координаты региона (для карты, из нашей базы)
     coords = get_table('vlad', 'regions_coords', user, password, host, port)
@@ -1466,11 +1464,11 @@ def update_stat_in_shablon(df, name_sheet):
     df_shablon = df_shablon[['Дата', 'Нейминг', 'Заявка', 'Канал', 'Текст', 'Аудитория',
                      'Показы', 'Подписчики', 'CTR', 'ID', 'Регион']]
     try:
-        os.remove('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Shablon_lists/Статистика_ТГ.xlsx')
+        os.remove('/Shablon_lists/Статистика_ТГ.xlsx')
     except:
         pass
 
-    save_excel(df_shablon, '/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Shablon_lists/Статистика_ТГ.xlsx')
+    save_excel(df_shablon, '/Shablon_lists/Статистика_ТГ.xlsx')
 
     update_shablon_sheet('Шаблон для таргета.xlsx', name_sheet, df_shablon)
 
@@ -1533,9 +1531,6 @@ async def get_telegram_little(chat_id, tg_bot, df, kpi, def_sum_show, def_sum_de
     # Соединяем обе таблицы по региону (фактические данные и прогнозы сводятся в одну таблицу)
     little = little.merge(df_buf, on='Регион', how='inner')
 
-    # Отладочное сохранение
-    save_excel(little, '/media/sidorov/dev/NoteProjects/Zalivka_BD/test_little.xlsx')
-
     # Оставляем только нужные столбцы, переименовываем их названия и заполняем пропуски
     little = little[['Регион',
                      'Подписчики',
@@ -1572,6 +1567,7 @@ async def update_cloud_table(message, dir_name, new_target_name):
         # Удаляем предыдущую таблицу в облаке
         list_f = subprocess.run(['rm',
                                  f'/run/user/1004/gvfs/dav:host=cloud.dialog-regions.ru,ssl=true,prefix=%2Fremote.php%2Fdav/files/SidorovVS/{dir_name}/{new_target_name}',
+
                                  ],
                                 stdout=subprocess.PIPE,
                                 text=True,
@@ -1619,7 +1615,7 @@ def get_reg_scor_with_other_tables(reg_scor):
     reg_scor = reg_scor.copy()
 
     # ...................Подготовка таблицы kpi для мержинга с reg_scor
-    kpi_cpf = pd.read_excel('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Shablon_lists/KPI.xlsx')
+    kpi_cpf = pd.read_excel('/Shablon_lists/KPI.xlsx')
     kpi_cpf = kpi_cpf.rename(columns={'Подрядчик': 'подрядчик'})
 
     # .................Подготовка таблицы telegram_little для мержинга с reg_scor
@@ -1635,7 +1631,7 @@ def get_reg_scor_with_other_tables(reg_scor):
 
     # .......................Подготовка таблицы "аудитория" из шаблона для мержинга с reg_scor
     # ? Связать с шаблоном ?
-    auditory = pd.read_excel('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Шаблон для таргета.xlsx',
+    auditory = pd.read_excel('Шаблон для таргета.xlsx',
                              sheet_name='аудитория')
 
     # Удаляем строки с пропущенным регионом полностью пустые колонки или строки
@@ -1667,7 +1663,7 @@ def add_bans_cols(reg_scor):
     date_col = 'дата_создания_точность_дни'
 
     # ..................Подготовка bans
-    bans = pd.read_excel('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Штрафы.xlsx')
+    bans = pd.read_excel('Штрафы.xlsx')
     bans.columns = [i.strip().lower() for i in bans.columns]
 
     # Добавляем необходимые столбцы в "bans" "дата_создания_точность_дни" и "дата_создания_квартал"
@@ -1811,7 +1807,7 @@ def get_budget_table():
         'декабрь': 12,
     }
 
-    budg_new = pd.read_excel('/media/sidorov/dev/PycharmProjects/TG_bots/DB_bots/Shablon_lists/Бюджет.xlsx', header=[0, 1])
+    budg_new = pd.read_excel('/Shablon_lists/Бюджет.xlsx', header=[0, 1])
 
     budg_new.columns = budg_new.columns.map('_'.join)
     budg_new.rename(columns={'Unnamed: 0_level_0_Регион': 'подрядчик'}, inplace=True)
@@ -1879,6 +1875,7 @@ def get_TG_id(s1):
 # Функция занесения чата id в таблицу
 def add_chat_id(username, chat_id):
     UsChatId = pd.read_excel('UsChatId.xlsx')
+    print(UsChatId)
     if username not in UsChatId['user_name'].values:
         UsChatId = UsChatId.append({'user_name': username, 'chat_id': chat_id}, ignore_index=True)
         save_excel(UsChatId, 'UsChatId.xlsx')
