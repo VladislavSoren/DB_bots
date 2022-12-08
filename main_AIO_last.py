@@ -22,6 +22,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # apihelper.API_URL = "http://localhost:8090/bot{0}/{1}"
+path_base = 'C:/Projects/Python_projects/DB_bots'
+
 
 # Конфиденциальные данные
 load_dotenv(find_dotenv()) # погрузка .env
@@ -30,7 +32,7 @@ user = os.getenv('user')
 password = os.getenv('password')
 
 baza = 'target_dash'
-host = '10.128.0.20'
+host = 'rc1a-g1bf60qz9xqx8l90.mdb.yandexcloud.net'
 port = '6432'
 
 # Настройка подключения
@@ -43,6 +45,9 @@ dp = Dispatcher(bot, storage=storage)
 # Функция, обрабатывающая команду /start
 @dp.message_handler(commands=['start'])
 async def start_message(message):
+
+    await bot.send_message(message.chat.id, f'Инициализация')
+
     users = pd.read_csv('users_target.txt')
     username = message.from_user.username
     access = username in users['User_name'].values
@@ -85,9 +90,9 @@ async def delete_ex_tables(message):
     access = username in users['User_name'].values
     if access:
         try:
-            dirs = ['/target_dash/inf/',
-                    '/target_dash/pod/',
-                    '/target_dash/soc/'
+            dirs = [path_base + '/target_dash/inf/',
+                    path_base + '/target_dash/pod/',
+                    path_base + '/target_dash/soc/'
                     ]
 
             await bot.send_message(message.chat.id, 'Удаляем старые')
