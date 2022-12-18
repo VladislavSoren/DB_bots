@@ -16,7 +16,7 @@ from dotenv import load_dotenv, find_dotenv
 
 
 # print(API_TOKEN)
-bot = Bot(token='5408841853:AAFTIR9Gn3JBwft0OdOhs6tr2dVpDFTMeN4')
+bot = Bot(token='')
 storage = MemoryStorage()
 dp = Dispatcher(bot, storage=storage)
 
